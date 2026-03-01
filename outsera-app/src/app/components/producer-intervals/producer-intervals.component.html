@@ -1,23 +1,23 @@
 <section class="panel">
   <h2>Producers with longest and shortest interval between wins</h2>
   
-  @if (loading) {
+  @if (loading$ | async) {
     <div class="loading">
       <p>Loading producer intervals...</p>
     </div>
   }
 
-  @if (error) {
+  @if (error$ | async; as error) {
     <div class="error">
       <p>{{ error }}</p>
     </div>
   }
 
-  @if (!loading && !error) {
+  @if (!(loading$ | async) && !(error$ | async)) {
     <div class="interval-tables">
       <div class="interval-table">
         <h3>Maximum</h3>
-        @if (producerIntervals.max.length > 0) {
+        @if ((producerIntervals$ | async)?.max?.length ?? 0 > 0) {
           <table class="data-table">
             <thead>
               <tr>
@@ -28,7 +28,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (p of producerIntervals.max; track p.producer) {
+              @for (p of (producerIntervals$ | async)?.max; track p.producer) {
                 <tr>
                   <td>{{ p.producer }}</td>
                   <td>{{ p.interval }}</td>
@@ -47,7 +47,7 @@
       
       <div class="interval-table">
         <h3>Minimum</h3>
-        @if (producerIntervals.min.length > 0) {
+        @if ((producerIntervals$ | async)?.min?.length ?? 0 > 0) {
           <table class="data-table">
             <thead>
               <tr>
@@ -58,7 +58,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (p of producerIntervals.min; track p.producer) {
+              @for (p of (producerIntervals$ | async)?.min; track p.producer) {
                 <tr>
                   <td>{{ p.producer }}</td>
                   <td>{{ p.interval }}</td>

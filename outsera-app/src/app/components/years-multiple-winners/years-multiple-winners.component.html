@@ -1,19 +1,19 @@
   <section class="panel">
   <h2>List years with multiple winners</h2>
   
-  @if (loading) {
+  @if (loading$ | async) {
     <div class="loading">
       <p>Loading years with multiple winners...</p>
     </div>
   }
 
-  @if (error) {
+  @if (error$ | async; as error) {
     <div class="error">
       <p>{{ error }}</p>
     </div>
   }
 
-  @if (!loading && !error && yearsWithMultipleWinners.length > 0) {
+  @if (!(loading$ | async) && !(error$ | async) && ((yearsWithMultipleWinners$ | async)?.length ?? 0) > 0) {
     <table class="data-table">
       <thead>
         <tr>
@@ -22,7 +22,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (y of yearsWithMultipleWinners; track y.year) {
+        @for (y of (yearsWithMultipleWinners$ | async); track y.year) {
           <tr>
             <td>{{ y.year }}</td>
             <td>{{ y.winnerCount }}</td>
@@ -32,7 +32,7 @@
     </table>
   }
 
-  @if (!loading && !error && yearsWithMultipleWinners.length === 0) {
+  @if (!(loading$ | async) && !(error$ | async) && (yearsWithMultipleWinners$ | async)?.length === 0) {
     <div class="no-data">
       <p>No years with multiple winners found.</p>
     </div>

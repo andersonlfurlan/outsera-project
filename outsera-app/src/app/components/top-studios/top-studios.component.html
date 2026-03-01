@@ -1,19 +1,19 @@
 <section class="panel">
   <h2>Top 3 studios with winners</h2>
   
-  @if (loading) {
+  @if (loading$ | async) {
     <div class="loading">
       <p>Loading top studios...</p>
     </div>
   }
 
-  @if (error) {
+  @if (error$ | async; as error) {
     <div class="error">
       <p>{{ error }}</p>
     </div>
   }
 
-  @if (!loading && !error && topStudios.length > 0) {
+  @if (!(loading$ | async) && !(error$ | async) && ((studiosWithWinCount$ | async)?.length ?? 0) > 0) {
     <table class="data-table">
       <thead>
         <tr>
@@ -22,7 +22,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (s of topStudios; track s.name) {
+        @for (s of (studiosWithWinCount$ | async); track s.name) {
           <tr>
             <td>{{ s.name }}</td>
             <td>{{ s.winCount }}</td>
@@ -32,7 +32,7 @@
     </table>
   }
 
-  @if (!loading && !error && topStudios.length === 0) {
+  @if (!(loading$ | async) && !(error$ | async) && (studiosWithWinCount$ | async)?.length === 0) {
     <div class="no-data">
       <p>No studios found.</p>
     </div>

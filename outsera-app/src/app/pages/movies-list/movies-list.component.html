@@ -1,27 +1,27 @@
 <div class="movies-container">
   <h1>List movies</h1>
 
-  @if (loading) {
+  @if (loading$ | async) {
     <div class="loading">
       <p>Loading movies...</p>
     </div>
   }
 
-  @if (error) {
+  @if (error$ | async; as error) {
     <div class="error">
       <p>{{ error }}</p>
     </div>
   }
 
-  @if (!loading && !error) {
+  @if (!(loading$ | async) && !(error$ | async)) {
     <div class="movies-content">
-      @if (movies.length === 0) {
+      @if ((movies$ | async)?.length === 0) {
         <div class="no-data">
           <p>No movies found with the selected filters.</p>
         </div>
       }
 
-      @if (movies.length > 0) {
+      @if (((movies$ | async)?.length ?? 0) > 0; as movies) {
         <div class="table-wrapper">
           <table class="movies-table">
             <thead>
@@ -49,7 +49,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (movie of movies; track movie.id; let i = $index) {
+              @for (movie of (movies$ | async); track movie.id; let i = $index) {
                 <tr class="movie-row">
                   <td class="col-id">{{ i + 1 }}</td>
                   <td class="col-year">{{ movie.year }}</td>
@@ -62,30 +62,32 @@
         </div>
       }
 
-      @if (totalPages > 1) {
+      @if (((totalPages$ | async) ?? 0) > 1) {
         <div class="pagination">
           <button 
             (click)="previousPage()" 
-            [disabled]="!hasPreviousPage"
+            [disabled]="(currentPage$ | async) === 0"
             class="pagination-btn"
             aria-label="Previous page">
             ◀
           </button>
 
           <div class="page-numbers">
-            @for (page of displayedPages; track page) {
-              <button
-                (click)="goToPage(page)"
-                [class.active]="page === currentPage"
-                class="page-number">
-                {{ page + 1 }}
-              </button>
+            @for (page of [0, 1, 2]; track page) {
+              @if (page < ((totalPages$ | async) ?? 0)) {
+                <button
+                  (click)="goToPage(page)"
+                  [class.active]="page === (currentPage$ | async)"
+                  class="page-number">
+                  {{ page + 1 }}
+                </button>
+              }
             }
           </div>
 
           <button 
             (click)="nextPage()" 
-            [disabled]="!hasNextPage"
+            [disabled]="((currentPage$ | async) ?? 0) >= (((totalPages$ | async) ?? 0) - 1)"
             class="pagination-btn"
             aria-label="Next page">
             ▶

@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { MovieService } from '../../services/movie.service';
+import { Observable } from 'rxjs';
+import { DashboardStore, DashboardState } from '../../stores';
 import { Movie } from '../../models/movie.model';
 
 @Component({
@@ -12,31 +12,32 @@ import { Movie } from '../../models/movie.model';
   templateUrl: './movie-winners-year.component.html',
   styleUrl: './movie-winners-year.component.css'
 })
-export class MovieWinnersYearComponent implements OnInit, OnDestroy {
+export class MovieWinnersYearComponent implements OnInit {
   searchForm: FormGroup;
-  winnersOfYear: Movie[] = [];
-  loading: boolean = false;
-  error: string | null = null;
-
-  private subscriptions = new Subscription();
+  
+  // Observable state from store
+  movieWinnersByYear$: Observable<DashboardState['movieWinnersByYear']>;
+  loading$: Observable<boolean>;
+  error$: Observable<string | null>;
 
   constructor(
-    private movieService: MovieService,
+    private dashboardStore: DashboardStore,
     private formBuilder: FormBuilder,
     private cdr: ChangeDetectorRef
   ) {
     this.searchForm = this.formBuilder.group({
       yearSearch: [null, [Validators.required, Validators.min(1900), Validators.max(2030)]]
     });
+    
+    // Initialize observables after dashboardStore is available
+    this.movieWinnersByYear$ = this.dashboardStore.movieWinnersByYear$;
+    this.loading$ = this.dashboardStore.loading$;
+    this.error$ = this.dashboardStore.error$;
   }
 
   ngOnInit(): void {
     console.log('[MOVIE-WINNERS-YEAR] Component initialized');
     console.log('[MOVIE-WINNERS-YEAR] Form status:', this.searchForm.status);
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
   }
 
   searchYear(): void {
@@ -51,24 +52,7 @@ export class MovieWinnersYearComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loading = true;
-    this.error = null;
-    this.cdr.markForCheck();
-
-    const subscription = this.movieService.getWinnersByYear(yearValue).subscribe({
-      next: (movies) => {
-        this.winnersOfYear = movies;
-        this.loading = false;
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('[MOVIE-WINNERS-YEAR] Error searching winners:', err);
-        this.error = `No winners found for year ${yearValue}`;
-        this.loading = false;
-        this.cdr.markForCheck();
-      }
-    });
-    this.subscriptions.add(subscription);
+    this.dashboardStore.loadMovieWinnersByYear(yearValue);
   }
 
   get yearSearchControl() {

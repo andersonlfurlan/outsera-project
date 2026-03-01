@@ -12,8 +12,8 @@
       
       <button 
         type="submit" 
-        [disabled]="loading || searchForm.invalid">
-        @if (loading) {
+        [disabled]="(loading$ | async) || searchForm.invalid">
+        @if (loading$ | async) {
           Searching...
         } @else {
           Search
@@ -36,19 +36,19 @@
     }
   </form>
 
-  @if (error) {
+  @if (error$ | async; as error) {
     <div class="error">
       <p>{{ error }}</p>
     </div>
   }
 
-  @if (loading) {
+  @if (loading$ | async) {
     <div class="loading">
       <p>Loading winners...</p>
     </div>
   }
 
-  @if (winnersOfYear.length > 0 && !loading) {
+  @if (((movieWinnersByYear$ | async)?.movies?.length ?? 0) > 0 && !(loading$ | async)) {
     <table class="data-table">
       <thead>
         <tr>
@@ -58,7 +58,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (m of winnersOfYear; track m.id) {
+        @for (m of (movieWinnersByYear$ | async)?.movies; track m.id) {
           <tr>
             <td>{{ m.id }}</td>
             <td>{{ m.year }}</td>
@@ -69,7 +69,7 @@
     </table>
   }
 
-  @if (winnersOfYear.length === 0 && !loading && !error && searchForm.get('yearSearch')?.value) {
+  @if (((movieWinnersByYear$ | async)?.movies?.length === 0 || (movieWinnersByYear$ | async)?.movies === undefined) && !(loading$ | async) && !(error$ | async) && searchForm.get('yearSearch')?.value && (movieWinnersByYear$ | async)?.year !== null) {
     <div class="no-data">
       <p>No winners found for the year {{ searchForm.get('yearSearch')?.value }}.</p>
     </div>

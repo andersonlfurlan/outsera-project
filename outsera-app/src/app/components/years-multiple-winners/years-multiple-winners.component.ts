@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
-import { MovieService } from '../../services/movie.service';
+import { Observable } from 'rxjs';
+import { DashboardStore } from '../../stores';
+import { YearMultipleWinner } from '../../models/movie.model';
 
 @Component({
   selector: 'app-years-multiple-winners',
@@ -10,40 +11,20 @@ import { MovieService } from '../../services/movie.service';
   templateUrl: './years-multiple-winners.component.html',
   styleUrl: './years-multiple-winners.component.css'
 })
-export class YearsMultipleWinnersComponent implements OnInit, OnDestroy {
-  yearsWithMultipleWinners: { year: number; winnerCount: number }[] = [];
-  loading: boolean = false;
-  error: string | null = null;
+export class YearsMultipleWinnersComponent implements OnInit {
+  // Observable state from store
+  yearsWithMultipleWinners$: Observable<YearMultipleWinner[]>;
+  loading$: Observable<boolean>;
+  error$: Observable<string | null>;
 
-  private subscriptions = new Subscription();
-
-  constructor(private movieService: MovieService, private cdr: ChangeDetectorRef) {}
+  constructor(private dashboardStore: DashboardStore, private cdr: ChangeDetectorRef) {
+    // Initialize observables after dashboardStore is available
+    this.yearsWithMultipleWinners$ = this.dashboardStore.yearsWithMultipleWinners$;
+    this.loading$ = this.dashboardStore.loading$;
+    this.error$ = this.dashboardStore.error$;
+  }
 
   ngOnInit(): void {
-    this.loadData();
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-
-  private loadData(): void {
-    this.loading = true;
-    this.error = null;
-
-    const subscription = this.movieService.getYearsWithMultipleWinners().subscribe({
-      next: (result) => {
-        this.yearsWithMultipleWinners = result.years;
-        this.loading = false;
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('[YEARS-MULTIPLE-WINNERS] Error loading data:', err);
-        this.error = 'Error loading years with multiple winners';
-        this.loading = false;
-        this.cdr.markForCheck();
-      }
-    });
-    this.subscriptions.add(subscription);
+    this.dashboardStore.loadYearsWithMultipleWinners();
   }
 }
