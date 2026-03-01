@@ -14,29 +14,29 @@ body {
 .app-layout {
   display: flex;
   width: 100%;
-  min-height: calc(100vh - 60px);
-  margin-top: 60px;
+  min-height: calc(100vh - 48px);
+  margin-top: 48px;
 }
 
 .main-content {
   flex: 1;
   margin-left: 240px;
-  padding: 2rem;
   background: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  transition: margin-left 0.3s ease;
 }
 
 @media (max-width: 1024px) {
   .main-content {
-    margin-left: 200px;
+    margin-left: 220px;
     padding: 1.5rem;
   }
 }
 
 @media (max-width: 768px) {
   .app-layout {
-    flex-direction: column;
-    margin-top: 60px;
+    flex-direction: row;
+    margin-top: 48px;
   }
   
   .main-content {
