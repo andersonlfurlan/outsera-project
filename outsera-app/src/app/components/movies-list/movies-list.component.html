@@ -1,0 +1,97 @@
+<div class="movies-container">
+  <h1>List movies</h1>
+
+  @if (loading) {
+    <div class="loading">
+      <p>Carregando filmes...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error">
+      <p>{{ error }}</p>
+    </div>
+  }
+
+  @if (!loading && !error) {
+    <div class="movies-content">
+      @if (movies.length === 0) {
+        <div class="no-data">
+          <p>Nenhum filme encontrado com os filtros selecionados.</p>
+        </div>
+      }
+
+      @if (movies.length > 0) {
+        <div class="table-wrapper">
+          <table class="movies-table">
+            <thead>
+              <tr>
+                <th class="col-id">ID</th>
+                <th class="col-year">
+                  <div class="header-content">
+                    <span>Year</span>
+                    <input 
+                      type="text" 
+                      placeholder="Filter by year" 
+                      [(ngModel)]="filterYear" 
+                      (change)="onFilterChange()"
+                      class="year-filter">
+                  </div>
+                </th>
+                <th class="col-title">Title</th>
+                <th class="col-winner">
+                  <select [(ngModel)]="filterWinner" (change)="onFilterChange()" class="winner-filter">
+                    <option [ngValue]="null">Yes/No</option>
+                    <option [ngValue]="true">Yes</option>
+                    <option [ngValue]="false">No</option>
+                  </select>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (movie of movies; track movie.id; let i = $index) {
+                <tr class="movie-row">
+                  <td class="col-id">{{ i + 1 }}</td>
+                  <td class="col-year">{{ movie.year }}</td>
+                  <td class="col-title">{{ movie.title }}</td>
+                  <td class="col-winner">{{ movie.winner ? 'Yes' : 'No' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (totalPages > 1) {
+        <div class="pagination">
+          <button 
+            (click)="previousPage()" 
+            [disabled]="!hasPreviousPage"
+            class="pagination-btn"
+            aria-label="Previous page">
+            ◀
+          </button>
+
+          <div class="page-numbers">
+            @for (page of displayedPages; track page) {
+              <button
+                (click)="goToPage(page)"
+                [class.active]="page === currentPage"
+                class="page-number">
+                {{ page + 1 }}
+              </button>
+            }
+          </div>
+
+          <button 
+            (click)="nextPage()" 
+            [disabled]="!hasNextPage"
+            class="pagination-btn"
+            aria-label="Next page">
+            ▶
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>
