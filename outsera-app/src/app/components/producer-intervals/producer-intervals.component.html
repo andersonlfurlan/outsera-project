@@ -1,0 +1,79 @@
+<section class="panel">
+  <h2>Producers with longest and shortest interval between wins</h2>
+  
+  @if (loading) {
+    <div class="loading">
+      <p>Loading producer intervals...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error">
+      <p>{{ error }}</p>
+    </div>
+  }
+
+  @if (!loading && !error) {
+    <div class="interval-tables">
+      <div class="interval-table">
+        <h3>Maximum</h3>
+        @if (producerIntervals.max.length > 0) {
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Producer</th>
+                <th>Interval</th>
+                <th>Previous Year</th>
+                <th>Following Year</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of producerIntervals.max; track p.producer) {
+                <tr>
+                  <td>{{ p.producer }}</td>
+                  <td>{{ p.interval }}</td>
+                  <td>{{ p.previousWin }}</td>
+                  <td>{{ p.followingWin }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="no-data">
+            <p>No maximum interval data found.</p>
+          </div>
+        }
+      </div>
+      
+      <div class="interval-table">
+        <h3>Minimum</h3>
+        @if (producerIntervals.min.length > 0) {
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Producer</th>
+                <th>Interval</th>
+                <th>Previous Year</th>
+                <th>Following Year</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of producerIntervals.min; track p.producer) {
+                <tr>
+                  <td>{{ p.producer }}</td>
+                  <td>{{ p.interval }}</td>
+                  <td>{{ p.previousWin }}</td>
+                  <td>{{ p.followingWin }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="no-data">
+            <p>No minimum interval data found.</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</section>

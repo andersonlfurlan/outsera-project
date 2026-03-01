@@ -1,0 +1,77 @@
+<section class="panel">
+  <h2>List movie winners by year</h2>
+  
+  <form [formGroup]="searchForm" (ngSubmit)="searchYear()" class="year-search">
+    <div class="input-group">
+      <input 
+        type="number" 
+        formControlName="yearSearch"
+        placeholder="Search by year"
+        [class.invalid]="yearSearchControl?.invalid && yearSearchControl?.touched"
+        (keyup.enter)="searchYear()" />
+      
+      <button 
+        type="submit" 
+        [disabled]="loading || searchForm.invalid">
+        @if (loading) {
+          Searching...
+        } @else {
+          Search
+        }
+      </button>
+    </div>
+    
+    @if (yearSearchControl?.invalid && yearSearchControl?.touched) {
+      <div class="validation-errors">
+        @if (yearSearchControl?.errors?.['required']) {
+          <span class="error-message">Year is mandatory</span>
+        }
+        @if (yearSearchControl?.errors?.['min']) {
+          <span class="error-message">Year must be greater than 1900</span>
+        }
+        @if (yearSearchControl?.errors?.['max']) {
+          <span class="error-message">Year cannot be greater than the current year</span>
+        }
+      </div>
+    }
+  </form>
+
+  @if (error) {
+    <div class="error">
+      <p>{{ error }}</p>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">
+      <p>Loading winners...</p>
+    </div>
+  }
+
+  @if (winnersOfYear.length > 0 && !loading) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Year</th>
+          <th>Title</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of winnersOfYear; track m.id) {
+          <tr>
+            <td>{{ m.id }}</td>
+            <td>{{ m.year }}</td>
+            <td>{{ m.title }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (winnersOfYear.length === 0 && !loading && !error && searchForm.get('yearSearch')?.value) {
+    <div class="no-data">
+      <p>No winners found for the year {{ searchForm.get('yearSearch')?.value }}.</p>
+    </div>
+  }
+</section>

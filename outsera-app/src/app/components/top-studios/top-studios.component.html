@@ -1,0 +1,40 @@
+<section class="panel">
+  <h2>Top 3 studios with winners</h2>
+  
+  @if (loading) {
+    <div class="loading">
+      <p>Loading top studios...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error">
+      <p>{{ error }}</p>
+    </div>
+  }
+
+  @if (!loading && !error && topStudios.length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Win Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (s of topStudios; track s.name) {
+          <tr>
+            <td>{{ s.name }}</td>
+            <td>{{ s.winCount }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!loading && !error && topStudios.length === 0) {
+    <div class="no-data">
+      <p>No studios found.</p>
+    </div>
+  }
+</section>

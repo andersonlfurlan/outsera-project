@@ -1,0 +1,40 @@
+  <section class="panel">
+  <h2>List years with multiple winners</h2>
+  
+  @if (loading) {
+    <div class="loading">
+      <p>Loading years with multiple winners...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error">
+      <p>{{ error }}</p>
+    </div>
+  }
+
+  @if (!loading && !error && yearsWithMultipleWinners.length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Win Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (y of yearsWithMultipleWinners; track y.year) {
+          <tr>
+            <td>{{ y.year }}</td>
+            <td>{{ y.winnerCount }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!loading && !error && yearsWithMultipleWinners.length === 0) {
+    <div class="no-data">
+      <p>No years with multiple winners found.</p>
+    </div>
+  }
+</section>
