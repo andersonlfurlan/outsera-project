@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { of, throwError } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { MovieWinnersYearComponent } from './movie-winners-year.component';
-import { MovieService } from '../../services/movie.service';
+import { DashboardStore } from '../../stores/dashboard.store';
 import { Movie } from '../../models/movie.model';
 
 describe('MovieWinnersYearComponent', () => {
   let component: MovieWinnersYearComponent;
   let fixture: ComponentFixture<MovieWinnersYearComponent>;
-  let movieService: any;
+  let dashboardStore: any;
   let cdr: any;
 
   const mockMovies: Movie[] = [
@@ -35,9 +35,16 @@ describe('MovieWinnersYearComponent', () => {
   ];
 
   beforeEach(async () => {
-    const movieServiceSpy = {
-      getWinnersByYear: vi.fn()
+    const dashboardStoreSpy = {
+      movieWinnersByYear$: new BehaviorSubject<{ year: number | null; movies: Movie[] }>({
+        year: null,
+        movies: []
+      }),
+      loading$: new BehaviorSubject<boolean>(false),
+      error$: new BehaviorSubject<string | null>(null),
+      loadMovieWinnersByYear: vi.fn()
     };
+    
     const cdrSpy = {
       detectChanges: vi.fn()
     };
@@ -45,14 +52,14 @@ describe('MovieWinnersYearComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MovieWinnersYearComponent, ReactiveFormsModule, HttpClientTestingModule],
       providers: [
-        { provide: MovieService, useValue: movieServiceSpy },
+        { provide: DashboardStore, useValue: dashboardStoreSpy },
         { provide: ChangeDetectorRef, useValue: cdrSpy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(MovieWinnersYearComponent);
     component = fixture.componentInstance;
-    movieService = TestBed.inject(MovieService);
+    dashboardStore = TestBed.inject(DashboardStore);
     cdr = TestBed.inject(ChangeDetectorRef);
   });
 
@@ -83,28 +90,18 @@ describe('MovieWinnersYearComponent', () => {
     expect(yearControl?.valid).toBeTruthy();
   });
 
-  it('should search winners successfully', () => {
-    movieService.getWinnersByYear.mockReturnValue(of(mockMovies));
-    component.searchForm.get('yearSearch')?.setValue(1980);
-    
-    component.searchYear();
-    
-    expect(movieService.getWinnersByYear).toHaveBeenCalledWith(1980);
-    expect(component.winnersOfYear).toEqual(mockMovies);
-    expect(component.loading).toBeFalsy();
-    expect(component.error).toBeNull();
+  it('should initialize observables from store', () => {
+    expect(component.movieWinnersByYear$).toBeTruthy();
+    expect(component.loading$).toBeTruthy();
+    expect(component.error$).toBeTruthy();
   });
 
-  it('should handle search error', () => {
-    const errorMessage = 'Server error';
-    movieService.getWinnersByYear.mockReturnValue(throwError(() => ({ message: errorMessage })));
+  it('should search winners successfully', () => {
     component.searchForm.get('yearSearch')?.setValue(1980);
     
     component.searchYear();
     
-    expect(component.loading).toBeFalsy();
-    expect(component.error).toBe('No winners found for year 1980');
-    expect(component.winnersOfYear).toEqual([]);
+    expect(dashboardStore.loadMovieWinnersByYear).toHaveBeenCalledWith(1980);
   });
 
   it('should not search if form is invalid', () => {
@@ -112,7 +109,7 @@ describe('MovieWinnersYearComponent', () => {
     
     component.searchYear();
     
-    expect(movieService.getWinnersByYear).not.toHaveBeenCalled();
+    expect(dashboardStore.loadMovieWinnersByYear).not.toHaveBeenCalled();
   });
 
 });

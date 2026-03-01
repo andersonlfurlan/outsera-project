@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ChangeDetectorRef } from '@angular/core';
-import { of, throwError } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { ProducerIntervalsComponent } from './producer-intervals.component';
-import { MovieService } from '../../services/movie.service';
+import { DashboardStore } from '../../stores/dashboard.store';
 import { MaxMinInterval } from '../../models/movie.model';
 
 describe('ProducerIntervalsComponent', () => {
   let component: ProducerIntervalsComponent;
   let fixture: ComponentFixture<ProducerIntervalsComponent>;
-  let movieService: any;
+  let dashboardStore: any;
   let cdr: any;
 
   const mockIntervalData: MaxMinInterval = {
@@ -34,9 +34,13 @@ describe('ProducerIntervalsComponent', () => {
   };
 
   beforeEach(async () => {
-    const movieServiceSpy = {
-      getMaxMinWinIntervalForProducers: vi.fn()
+    const dashboardStoreSpy = {
+      producerIntervals$: new BehaviorSubject<MaxMinInterval>({ min: [], max: [] }),
+      loading$: new BehaviorSubject<boolean>(false),
+      error$: new BehaviorSubject<string | null>(null),
+      loadProducerIntervals: vi.fn()
     };
+    
     const cdrSpy = {
       detectChanges: vi.fn()
     };
@@ -44,14 +48,14 @@ describe('ProducerIntervalsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ProducerIntervalsComponent, HttpClientTestingModule],
       providers: [
-        { provide: MovieService, useValue: movieServiceSpy },
+        { provide: DashboardStore, useValue: dashboardStoreSpy },
         { provide: ChangeDetectorRef, useValue: cdrSpy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProducerIntervalsComponent);
     component = fixture.componentInstance;
-    movieService = TestBed.inject(MovieService);
+    dashboardStore = TestBed.inject(DashboardStore);
     cdr = TestBed.inject(ChangeDetectorRef);
   });
 
@@ -59,34 +63,15 @@ describe('ProducerIntervalsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with default values', () => {
-    expect(component.producerIntervals).toEqual({ min: [], max: [] });
-    expect(component.loading).toBeFalsy();
-    expect(component.error).toBeNull();
+  it('should initialize observables from store', () => {
+    expect(component.producerIntervals$).toBeTruthy();
+    expect(component.loading$).toBeTruthy();
+    expect(component.error$).toBeTruthy();
   });
 
   it('should load producer intervals on init', () => {
-    movieService.getMaxMinWinIntervalForProducers.mockReturnValue(of(mockIntervalData));
-
     component.ngOnInit();
-
-    expect(movieService.getMaxMinWinIntervalForProducers).toHaveBeenCalled();
-    expect(component.producerIntervals).toEqual(mockIntervalData);
-    expect(component.loading).toBeFalsy();
-    expect(component.error).toBeNull();
-  });
-
-  it('should handle loading error', () => {
-    const errorMessage = 'Server error';
-    movieService.getMaxMinWinIntervalForProducers.mockReturnValue(
-      throwError(() => ({ message: errorMessage }))
-    );
-
-    component.ngOnInit();
-
-    expect(component.loading).toBeFalsy();
-    expect(component.error).toBe('Error loading producer intervals');
-    expect(component.producerIntervals).toEqual({ min: [], max: [] });
+    expect(dashboardStore.loadProducerIntervals).toHaveBeenCalled();
   });
 
 });

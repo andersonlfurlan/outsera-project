@@ -36,8 +36,6 @@ export class MovieWinnersYearComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('[MOVIE-WINNERS-YEAR] Component initialized');
-    console.log('[MOVIE-WINNERS-YEAR] Form status:', this.searchForm.status);
   }
 
   searchYear(): void {

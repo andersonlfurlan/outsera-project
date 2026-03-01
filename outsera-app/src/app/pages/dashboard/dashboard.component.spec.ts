@@ -1,18 +1,41 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { BehaviorSubject } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DashboardComponent } from './dashboard.component';
+import { DashboardStore } from '../../stores/dashboard.store';
+import { MaxMinInterval, StudioCount, YearMultipleWinner, Movie } from '../../models/movie.model';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
+  let dashboardStore: any;
 
   beforeEach(async () => {
+    const dashboardStoreSpy = {
+      yearsWithMultipleWinners$: new BehaviorSubject<YearMultipleWinner[]>([]),
+      studiosWithWinCount$: new BehaviorSubject<StudioCount[]>([]),
+      producerIntervals$: new BehaviorSubject<MaxMinInterval>({ min: [], max: [] }),
+      movieWinnersByYear$: new BehaviorSubject<{ year: number | null; movies: Movie[] }>({ year: null, movies: [] }),
+      loading$: new BehaviorSubject<boolean>(false),
+      error$: new BehaviorSubject<string | null>(null),
+      loadYearsWithMultipleWinners: vi.fn(),
+      loadStudiosWithWinCount: vi.fn(),
+      loadProducerIntervals: vi.fn(),
+      loadMovieWinnersByYear: vi.fn(),
+      loadAllDashboardData: vi.fn()
+    };
+
     await TestBed.configureTestingModule({
-      imports: [DashboardComponent]
+      imports: [DashboardComponent, HttpClientTestingModule],
+      providers: [
+        { provide: DashboardStore, useValue: dashboardStoreSpy }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardComponent);
     component = fixture.componentInstance;
+    dashboardStore = TestBed.inject(DashboardStore);
   });
 
   it('should create', () => {

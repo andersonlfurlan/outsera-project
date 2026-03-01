@@ -1,65 +1,62 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { of, throwError } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { MoviesListComponent } from './movies-list.component';
-import { MovieService } from '../../services/movie.service';
+import { MovieStore } from '../../stores/movie.store';
 import { Movie, Page } from '../../models/movie.model';
+import { MovieFilters } from '../../stores/movie.store';
 
 describe('MoviesListComponent', () => {
   let component: MoviesListComponent;
   let fixture: ComponentFixture<MoviesListComponent>;
-  let movieService: any;
+  let movieStore: any;
   let cdr: any;
 
-  const mockMoviesPage: Page<Movie> = {
-    content: [
-      {
-        id: 1,
-        year: 1980,
-        title: 'Test Movie 1',
-        studios: ['Test Studio 1'],
-        producers: ['Test Producer 1'],
-        winner: true
-      },
-      {
-        id: 2,
-        year: 1981,
-        title: 'Test Movie 2',
-        studios: ['Test Studio 2'],
-        producers: ['Test Producer 2'],
-        winner: false
-      }
-    ],
-    number: 0,
-    size: 10,
-    totalElements: 2,
-    totalPages: 1,
-    first: true,
-    last: true,
-    numberOfElements: 2,
-    empty: false,
-    pageable: {
-      pageNumber: 0,
-      unpaged: false,
-      paged: true,
-      pageSize: 10,
-      offset: 0
+  const mockMovies: Movie[] = [
+    {
+      id: 1,
+      year: 1980,
+      title: 'Test Movie 1',
+      studios: ['Test Studio 1'],
+      producers: ['Test Producer 1'],
+      winner: true
     },
-    sort: {
-      unsorted: true,
-      sorted: false,
-      empty: true
+    {
+      id: 2,
+      year: 1981,
+      title: 'Test Movie 2',
+      studios: ['Test Studio 2'],
+      producers: ['Test Producer 2'],
+      winner: false
     }
-  };
+  ];
 
   beforeEach(async () => {
-    const movieServiceSpy = {
-      getMovies: vi.fn().mockReturnValue(of(mockMoviesPage)),
-      getAllMovies: vi.fn().mockReturnValue(of(mockMoviesPage))
+    const mockFilters: MovieFilters = { winner: null, year: null };
+    
+    const movieStoreSpy = {
+      movies$: new BehaviorSubject<Movie[]>([]),
+      totalElements$: new BehaviorSubject<number>(0),
+      currentPage$: new BehaviorSubject<number>(0),
+      pageSize$: new BehaviorSubject<number>(10),
+      totalPages$: new BehaviorSubject<number>(0),
+      filters$: new BehaviorSubject<MovieFilters>(mockFilters),
+      availableYears$: new BehaviorSubject<number[]>([]),
+      loading$: new BehaviorSubject<boolean>(false),
+      error$: new BehaviorSubject<string | null>(null),
+      loadMovies: vi.fn(),
+      setPage: vi.fn(),
+      goToNextPage: vi.fn(),
+      goToPreviousPage: vi.fn(),
+      goToFirstPage: vi.fn(),
+      goToLastPage: vi.fn(),
+      setFilters: vi.fn(),
+      clearFilters: vi.fn()
     };
+    
     const cdrSpy = {
       detectChanges: vi.fn(),
       markForCheck: vi.fn()
@@ -68,14 +65,14 @@ describe('MoviesListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MoviesListComponent, HttpClientTestingModule],
       providers: [
-        { provide: MovieService, useValue: movieServiceSpy },
+        { provide: MovieStore, useValue: movieStoreSpy },
         { provide: ChangeDetectorRef, useValue: cdrSpy }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(MoviesListComponent);
     component = fixture.componentInstance;
-    movieService = TestBed.inject(MovieService);
+    movieStore = TestBed.inject(MovieStore);
     cdr = TestBed.inject(ChangeDetectorRef);
   });
 
@@ -83,75 +80,44 @@ describe('MoviesListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with default values', () => {
-    expect(component.movies).toEqual([]);
-    expect(component.loading).toBeFalsy();
-    expect(component.error).toBeNull();
-    expect(component.currentPage).toBe(0);
-    expect(component.pageSize).toBe(10);
-    expect(component.totalElements).toBe(0);
+  it('should initialize observables from store', () => {
+    expect(component.movies$).toBeTruthy();
+    expect(component.loading$).toBeTruthy();
+    expect(component.error$).toBeTruthy();
+    expect(component.currentPage$).toBeTruthy();
+    expect(component.totalElements$).toBeTruthy();
   });
 
-  it('should load movies on init', () => {
+  it('should call loadMovies on init', () => {
     component.ngOnInit();
-
-    expect(movieService.getMovies).toHaveBeenCalled();
-    expect(component.movies).toEqual(mockMoviesPage.content);
-    expect(component.loading).toBeFalsy();
-    expect(component.error).toBeNull();
-    expect(component.totalElements).toBe(2);
+    expect(movieStore.loadMovies).toHaveBeenCalled();
   });
 
-  it('should handle loading error', () => {
-    const errorMessage = 'Server error';
-    movieService.getMovies.mockReturnValue(throwError(() => ({ message: errorMessage })));
-
-    component.ngOnInit();
-
-    expect(component.loading).toBeFalsy();
-    expect(component.error).toBe('Erro ao carregar filmes');
-    expect(component.movies).toEqual([]);
-  });
-
-  it('should handle error without message', () => {
-    movieService.getMovies.mockReturnValue(throwError(() => ({})));
-
-    component.ngOnInit();
-
-    expect(component.error).toBe('Erro ao carregar filmes');
-  });
-
-  it('should go to next page', () => {
-    component.totalPages = 3;
-    component.currentPage = 0;
+  it('should call nextPage on store', () => {
     component.nextPage();
-
-    expect(component.currentPage).toBe(1);
-    expect(movieService.getMovies).toHaveBeenCalledWith(1, 10, undefined, undefined);
+    expect(movieStore.goToNextPage).toHaveBeenCalled();
   });
 
-  it('should go to previous page', () => {
-    component.currentPage = 1;
+  it('should call previousPage on store', () => {
     component.previousPage();
-
-    expect(component.currentPage).toBe(0);
-    expect(movieService.getMovies).toHaveBeenCalledWith(0, 10, undefined, undefined);
+    expect(movieStore.goToPreviousPage).toHaveBeenCalled();
   });
 
-  it('should go to first page', () => {
-    component.currentPage = 2;
-    component.totalPages = 3;
-    component.goToPage(0);
-
-    expect(component.currentPage).toBe(0);
+  it('should call goToPage on store', () => {
+    component.goToPage(5);
+    expect(movieStore.setPage).toHaveBeenCalledWith(5);
   });
 
-  it('should go to last page', () => {
-    component.totalPages = 5;
-    component.goToPage(4);
+  it('should call setFilters on filter change', () => {
+    component.filterWinner = true;
+    component.filterYear = 2000;
+    component.onFilterChange();
+    expect(movieStore.setFilters).toHaveBeenCalledWith({ winner: true, year: 2000 });
+  });
 
-    expect(component.currentPage).toBe(4);
-    expect(movieService.getMovies).toHaveBeenCalledWith(4, 10, undefined, undefined);
+  it('should clear filters', () => {
+    component.clearFilters();
+    expect(movieStore.clearFilters).toHaveBeenCalled();
   });
 
   afterEach(() => {
