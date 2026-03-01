@@ -12,13 +12,11 @@ import { YearMultipleWinner } from '../../models/movie.model';
   styleUrl: './years-multiple-winners.component.css'
 })
 export class YearsMultipleWinnersComponent implements OnInit {
-  // Observable state from store
   yearsWithMultipleWinners$: Observable<YearMultipleWinner[]>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
 
   constructor(private dashboardStore: DashboardStore, private cdr: ChangeDetectorRef) {
-    // Initialize observables after dashboardStore is available
     this.yearsWithMultipleWinners$ = this.dashboardStore.yearsWithMultipleWinners$;
     this.loading$ = this.dashboardStore.loading$;
     this.error$ = this.dashboardStore.error$;

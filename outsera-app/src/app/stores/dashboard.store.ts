@@ -35,7 +35,6 @@ export class DashboardStore extends BaseStore<DashboardState> {
     super(initialState);
   }
 
-  // Selectors
   yearsWithMultipleWinners$ = this.select('yearsWithMultipleWinners');
   studiosWithWinCount$ = this.select('studiosWithWinCount');
   producerIntervals$ = this.select('producerIntervals');
@@ -43,7 +42,6 @@ export class DashboardStore extends BaseStore<DashboardState> {
   loading$ = this.select('loading');
   error$ = this.select('error');
 
-  // Actions
   loadYearsWithMultipleWinners(): void {
     this.setLoading(true);
     this.setError(null);
@@ -70,7 +68,6 @@ export class DashboardStore extends BaseStore<DashboardState> {
 
     this.movieService.getStudiosWithWinCount().pipe(
       tap((result) => {
-        // Get top 3 studios with most wins
         const topStudios = result.studios
           .sort((a, b) => b.winCount - a.winCount)
           .slice(0, 3);

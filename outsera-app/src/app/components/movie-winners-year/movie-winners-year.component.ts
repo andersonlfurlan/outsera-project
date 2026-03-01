@@ -15,7 +15,6 @@ import { Movie } from '../../models/movie.model';
 export class MovieWinnersYearComponent implements OnInit {
   searchForm: FormGroup;
   
-  // Observable state from store
   movieWinnersByYear$: Observable<DashboardState['movieWinnersByYear']>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
@@ -29,7 +28,6 @@ export class MovieWinnersYearComponent implements OnInit {
       yearSearch: [null, [Validators.required, Validators.min(1900), Validators.max(2030)]]
     });
     
-    // Initialize observables after dashboardStore is available
     this.movieWinnersByYear$ = this.dashboardStore.movieWinnersByYear$;
     this.loading$ = this.dashboardStore.loading$;
     this.error$ = this.dashboardStore.error$;

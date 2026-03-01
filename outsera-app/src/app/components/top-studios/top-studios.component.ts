@@ -12,13 +12,11 @@ import { StudioCount } from '../../models/movie.model';
   styleUrl: './top-studios.component.css'
 })
 export class TopStudiosComponent implements OnInit {
-  // Observable state from store
   studiosWithWinCount$: Observable<StudioCount[]>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
 
   constructor(private dashboardStore: DashboardStore, private cdr: ChangeDetectorRef) {
-    // Initialize observables after dashboardStore is available
     this.studiosWithWinCount$ = this.dashboardStore.studiosWithWinCount$;
     this.loading$ = this.dashboardStore.loading$;
     this.error$ = this.dashboardStore.error$;

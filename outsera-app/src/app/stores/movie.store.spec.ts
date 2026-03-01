@@ -114,8 +114,6 @@ describe('MovieStore', () => {
   });
 
   it('should navigate to next page', async () => {
-    // Start with page 0 and totalPages = 1, so we can't go to next page
-    // First, let's ensure we have multiple pages
     const mockMultiplePagesResponse: Page<Movie> = {
       ...mockMoviesPage,
       totalPages: 3
@@ -171,7 +169,6 @@ describe('MovieStore', () => {
   });
 
   it('should handle error when loading movies', async () => {
-    // Silenciar console.error para este teste
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     movieService.getMovies.mockReturnValue(
@@ -188,7 +185,6 @@ describe('MovieStore', () => {
 
     expect(error).toBe('Erro ao carregar filmes');
     
-    // Restaurar console.error
     consoleErrorSpy.mockRestore();
   });
 

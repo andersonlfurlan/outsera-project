@@ -227,17 +227,15 @@ describe('Movie Models', () => {
 
   describe('Type Safety', () => {
     it('should enforce correct types for Movie properties', () => {
-      // This test verifies TypeScript compilation and type safety
       const movie: Movie = {
-        id: 1, // Must be number
-        year: 1980, // Must be number
-        title: 'Test', // Must be string
-        studios: ['Studio'], // Must be string array
-        producers: ['Producer'], // Must be string array
-        winner: true // Must be boolean
+        id: 1,
+        year: 1980,
+        title: 'Test',
+        studios: ['Studio'],
+        producers: ['Producer'],
+        winner: true
       };
 
-      // TypeScript will catch type mismatches at compile time
       expect(typeof movie.id).toBe('number');
       expect(typeof movie.year).toBe('number');
       expect(typeof movie.title).toBe('string');

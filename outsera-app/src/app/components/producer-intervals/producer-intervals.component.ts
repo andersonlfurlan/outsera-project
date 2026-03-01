@@ -11,13 +11,11 @@ import { DashboardStore, DashboardState } from '../../stores';
   styleUrl: './producer-intervals.component.css'
 })
 export class ProducerIntervalsComponent implements OnInit {
-  // Observable state from store
   producerIntervals$: Observable<DashboardState['producerIntervals']>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
 
   constructor(private dashboardStore: DashboardStore, private cdr: ChangeDetectorRef) {
-    // Initialize observables after dashboardStore is available
     this.producerIntervals$ = this.dashboardStore.producerIntervals$;
     this.loading$ = this.dashboardStore.loading$;
     this.error$ = this.dashboardStore.error$;

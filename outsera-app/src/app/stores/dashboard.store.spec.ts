@@ -133,7 +133,6 @@ describe('DashboardStore', () => {
   });
 
   it('should handle error when loading years with multiple winners', async () => {
-    // Silenciar console.error para este teste
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     movieService.getYearsWithMultipleWinners.mockReturnValue(
@@ -150,12 +149,10 @@ describe('DashboardStore', () => {
 
     expect(error).toBe('Error loading years with multiple winners');
     
-    // Restaurar console.error
     consoleErrorSpy.mockRestore();
   });
 
   it('should handle error when loading studios', async () => {
-    // Silenciar console.error para este teste
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     movieService.getStudiosWithWinCount.mockReturnValue(
@@ -172,12 +169,10 @@ describe('DashboardStore', () => {
 
     expect(error).toBe('Error loading studios data');
     
-    // Restaurar console.error
     consoleErrorSpy.mockRestore();
   });
 
   it('should handle error when loading producer intervals', async () => {
-    // Silenciar console.error para este teste
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     movieService.getMaxMinWinIntervalForProducers.mockReturnValue(
@@ -194,12 +189,10 @@ describe('DashboardStore', () => {
 
     expect(error).toBe('Error loading producer intervals');
     
-    // Restaurar console.error
     consoleErrorSpy.mockRestore();
   });
 
   it('should handle error when loading movie winners by year', async () => {
-    // Silenciar console.error para este teste
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     movieService.getWinnersByYear.mockReturnValue(
@@ -216,7 +209,6 @@ describe('DashboardStore', () => {
 
     expect(error).toBe('Error searching winners');
     
-    // Restaurar console.error
     consoleErrorSpy.mockRestore();
   });
 

@@ -13,7 +13,6 @@ import { MovieStore, MovieState, MovieFilters } from '../../stores';
   styleUrl: './movies-list.component.css'
 })
 export class MoviesListComponent implements OnInit {
-  // Observable state from store
   movies$: Observable<Movie[]>;
   totalElements$: Observable<number>;
   currentPage$: Observable<number>;
@@ -24,12 +23,10 @@ export class MoviesListComponent implements OnInit {
   filters$: Observable<MovieFilters>;
   availableYears$: Observable<number[]>;
 
-  // Local state for form bindings
   filterWinner: boolean | null = null;
   filterYear: number | null = null;
 
   constructor(private movieStore: MovieStore, private cdr: ChangeDetectorRef) {
-    // Initialize observables after movieStore is available
     this.movies$ = this.movieStore.movies$;
     this.totalElements$ = this.movieStore.totalElements$;
     this.currentPage$ = this.movieStore.currentPage$;
@@ -43,7 +40,6 @@ export class MoviesListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMovies();
-    // Subscribe to filters changes to update local form state
     this.filters$.subscribe(filters => {
       this.filterWinner = filters.winner;
       this.filterYear = filters.year;
